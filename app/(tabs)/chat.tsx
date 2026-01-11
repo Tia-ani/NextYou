@@ -1,20 +1,20 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import {
-  View,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-  FlatList,
-  Text,
   ActivityIndicator,
-  Platform,
+  FlatList,
   KeyboardAvoidingView,
+  Platform,
   StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { lifestyleData } from "@/constants/lifestyle";
 import { fitnessFAQ } from "@/constants/fitnessFAQ";
+import { lifestyleData } from "@/constants/lifestyle";
 
 interface Message {
   id: string;
@@ -22,10 +22,9 @@ interface Message {
   content: string;
 }
 
-const API_URL =
-  Platform.OS === "android"
-    ? "http://10.0.2.2:3000/chat"
-    : "http://localhost:3000/chat";
+const LOCAL_IP = "11.6.2.72";
+const API_URL = `http://${LOCAL_IP}:3000/chat`;
+
 
 type Personality =
   | "encouragement_seeker"

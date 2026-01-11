@@ -1,8 +1,8 @@
-import express from "express";
 import cors from "cors";
+import express from "express";
 
-import { groq } from "./groq.js";
 import { db } from "./db.js";
+import { groq } from "./groq.js";
 import { buildPrompt } from "./utils/promptBuilder.js";
 
 const app = express();
@@ -20,6 +20,7 @@ const bannedKeywords = [
 ];
 
 app.post("/chat", async (req, res) => {
+    
   const { message, personality, daysUsingApp, lifestyle } = req.body;
 
   // ---- SAFETY CHECK ----

@@ -1,9 +1,11 @@
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { Link } from "expo-router";
-import { Image, Platform, StatusBar, StyleSheet, View } from "react-native";
+import { useRouter } from "expo-router";
+import { Image, Platform, Pressable, StatusBar, StyleSheet, View } from "react-native";
+
 
 export default function HomeScreen() {
+  const router = useRouter();
   return (
     <ThemedView style={styles.container}>
       <StatusBar barStyle="dark-content" />
@@ -29,16 +31,9 @@ export default function HomeScreen() {
 
       {/* Features Section */}
       <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <ThemedText style={styles.sectionIcon}>✨</ThemedText>
-          <ThemedText type="subtitle" style={styles.sectionTitle}>
-            What I Can Help With
-          </ThemedText>
-        </View>
-
         <View style={styles.featureCard}>
           <ThemedText style={styles.featureIcon}>🏋️</ThemedText>
-          <View style={styles.featureContent}>
+          <View>
             <ThemedText style={styles.featureTitle}>Workout Plans</ThemedText>
             <ThemedText style={styles.featureText}>
               Personalized routines tailored to your goals
@@ -48,7 +43,7 @@ export default function HomeScreen() {
 
         <View style={styles.featureCard}>
           <ThemedText style={styles.featureIcon}>🔥</ThemedText>
-          <View style={styles.featureContent}>
+          <View>
             <ThemedText style={styles.featureTitle}>Motivation</ThemedText>
             <ThemedText style={styles.featureText}>
               Stay inspired and push through challenges
@@ -58,56 +53,44 @@ export default function HomeScreen() {
 
         <View style={styles.featureCard}>
           <ThemedText style={styles.featureIcon}>📈</ThemedText>
-          <View style={styles.featureContent}>
+          <View>
             <ThemedText style={styles.featureTitle}>Habit Building</ThemedText>
             <ThemedText style={styles.featureText}>
-              Develop consistency and track your progress
+              Build consistency and healthy routines
             </ThemedText>
           </View>
         </View>
       </View>
 
-      {/* Disclaimer Section */}
-      <View style={styles.disclaimerSection}>
-        <View style={styles.disclaimerHeader}>
-          <ThemedText style={styles.disclaimerIcon}>⚠️</ThemedText>
-          <ThemedText style={styles.disclaimerTitle}>Important</ThemedText>
-        </View>
+      {/* Disclaimer */}
+      <View style={styles.disclaimer}>
         <ThemedText style={styles.disclaimerText}>
-          I'm not a medical professional. I can't provide advice on injuries,
-          diseases, medications, or supplements.
+          ⚠️ This is not a medical tool. No injury, disease, or medication advice.
         </ThemedText>
       </View>
 
-      {/* CTA Button */}
-      <Link href="/chat" style={styles.ctaButton} asChild>
-        <View style={styles.buttonContainer}>
-          <ThemedText style={styles.buttonText}>Start Your Journey</ThemedText>
-          <ThemedText style={styles.buttonArrow}>→</ThemedText>
-        </View>
-      </Link>
+      {/* CTA */}
+      <Pressable
+        style={styles.ctaButton}
+        onPress={() => router.push("/chat")}>
+        <ThemedText style={styles.ctaText}>Start Chat</ThemedText>
+      </Pressable>
 
-      {/* Footer */}
+
       <View style={styles.footer}>
-        <ThemedText style={styles.footerText}>
-          Ready when you are
-        </ThemedText>
+        <ThemedText style={styles.footerText}>Ready when you are</ThemedText>
       </View>
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F8F9FA",
-  },
+  container: { flex: 1, backgroundColor: "#F8F9FA" },
 
   hero: {
     paddingTop: Platform.OS === "ios" ? 80 : 60,
-    paddingHorizontal: 24,
-    paddingBottom: 32,
     alignItems: "center",
+    paddingBottom: 24,
   },
 
   iconContainer: {
@@ -117,157 +100,61 @@ const styles = StyleSheet.create({
     backgroundColor: "#1D3D47",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 20,
-    shadowColor: "#1D3D47",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    marginBottom: 16,
   },
 
-  heroImage: {
-    width: 42,
-    height: 42,
-  },
+  heroImage: { width: 40, height: 40 },
 
   title: {
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: "800",
     color: "#1D3D47",
-    textAlign: "center",
-    marginBottom: 12,
+    marginBottom: 8,
   },
 
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: "#8E8E93",
     textAlign: "center",
-    lineHeight: 24,
-    paddingHorizontal: 20,
-  },
-
-  section: {
     paddingHorizontal: 24,
-    marginBottom: 24,
   },
 
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 16,
-    gap: 8,
-  },
-
-  sectionIcon: {
-    fontSize: 20,
-  },
-
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1D3D47",
-  },
+  section: { paddingHorizontal: 24, marginTop: 16 },
 
   featureCard: {
     flexDirection: "row",
-    backgroundColor: "#FFFFFF",
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 12,
-    alignItems: "center",
     gap: 16,
-    elevation: 2,
-  },
-
-  featureIcon: {
-    fontSize: 32,
-  },
-
-  featureContent: {
-    flex: 1,
-  },
-
-  featureTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#1D3D47",
-    marginBottom: 4,
-  },
-
-  featureText: {
-    fontSize: 14,
-    color: "#8E8E93",
-    lineHeight: 20,
-  },
-
-  disclaimerSection: {
-    marginHorizontal: 24,
+    backgroundColor: "#FFF",
     padding: 16,
-    backgroundColor: "#FFF9E6",
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#FFD700",
-    marginBottom: 24,
+    borderRadius: 14,
+    marginBottom: 12,
   },
 
-  disclaimerHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-    gap: 8,
+  featureIcon: { fontSize: 28 },
+  featureTitle: { fontSize: 16, fontWeight: "700", color: "#1D3D47" },
+  featureText: { fontSize: 14, color: "#8E8E93" },
+
+  disclaimer: {
+    marginHorizontal: 24,
+    padding: 12,
+    backgroundColor: "#FFF4E5",
+    borderRadius: 12,
+    marginTop: 16,
   },
 
-  disclaimerIcon: {
-    fontSize: 18,
-  },
-
-  disclaimerTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#1D3D47",
-  },
-
-  disclaimerText: {
-    fontSize: 14,
-    color: "#666",
-    lineHeight: 20,
-  },
+  disclaimerText: { fontSize: 13, color: "#666" },
 
   ctaButton: {
     marginHorizontal: 24,
-    marginBottom: 16,
-  },
-
-  buttonContainer: {
+    marginTop: 20,
     backgroundColor: "#1D3D47",
     paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 16,
-    flexDirection: "row",
+    borderRadius: 14,
     alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
   },
 
-  buttonText: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "700",
-  },
+  ctaText: { color: "#FFF", fontSize: 18, fontWeight: "700" },
 
-  buttonArrow: {
-    color: "#FFFFFF",
-    fontSize: 24,
-  },
-
-  footer: {
-    alignItems: "center",
-    paddingVertical: 16,
-  },
-
-  footerText: {
-    fontSize: 13,
-    color: "#8E8E93",
-    fontStyle: "italic",
-  },
+  footer: { alignItems: "center", marginTop: 12 },
+  footerText: { fontSize: 12, color: "#8E8E93" },
 });
