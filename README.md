@@ -1,134 +1,125 @@
 # Adaptive Fitness Companion Chatbot
 
-**React Native (Expo) + Node.js + LLM API**
+A mobile-first AI-powered fitness companion built using **React Native (Expo)** and **Node.js**, designed to provide **adaptive, behavior-aware fitness guidance** based on user personality, app usage duration, and lifestyle context.
+
+> ⚠️ This application is **not a medical tool** and does not provide advice related to injuries, diseases, medications, or supplements.
 
 ---
 
-## 1. Overview
+## Problem Statement
 
-The **Adaptive Fitness Companion Chatbot** is a mobile-first AI-powered fitness assistant designed to provide **personalized, behavior-aware fitness guidance**.
-
-Unlike a simple Q&A bot, this application dynamically adapts:
-
-* Its **tone**
-* Its **structure**
-* Its **coaching style**
-
-based on:
+The goal of this project is to design an AI fitness chatbot that goes beyond answering questions and instead **adapts its tone, structure, and guidance** based on:
 
 * User personality
-* App usage duration
+* How long the user has been using the app
 * Basic lifestyle context (movement & sleep)
 
-⚠️ This app is **not a medical tool** and intentionally avoids providing medical, injury-related, or medication advice.
+The focus is on **AI behavior design, UX empathy, and responsible prompt composition**, not just API integration.
 
 ---
 
-## 2. Problem Statement
+## Objectives Achieved
 
-The goal of this project is to design and build a fitness chatbot that demonstrates:
+This project demonstrates:
 
-* Strong **React Native UI/UX**
-* Thoughtful **AI behavior design**
-* Clean **prompt composition**
-* Responsible **health-related scope handling**
-
-The core challenge is not answering fitness questions, but **adapting AI behavior** to different user contexts in a safe, empathetic, and structured manner.
+* Strong **React Native UI/UX** skills
+* Conversational AI integration with **LLM APIs**
+* Thoughtful **behavior-aware product design**
+* Clean **prompt architecture**
+* Responsible **safety guardrails** for health-related topics
 
 ---
 
-## 3. Tech Stack
+## 🧱 Tech Stack
 
 ### Frontend
 
-* **React Native**
-* **Expo (Managed Workflow)**
+* React Native (Expo – Managed Workflow)
 * Expo Router
 * AsyncStorage (local persistence)
 
 ### Backend
 
-* **Node.js (v20.x LTS)**
-* **Express**
-* SQLite (for chat history storage)
+* Node.js + Express
+* SQLite (chat history storage)
 
 ### AI
 
-* LLM API (Chat Completion style)
-* Custom prompt composition logic (system-level prompts)
+* LLM API (Groq / OpenAI-compatible interface)
+* Prompt-based behavior control
 
 ---
 
-## 4. Core Features
+## ✨ Core Features
 
-### 4.1 Welcome / Home Screen
+### 1️⃣ Welcome / Home Screen
 
-* Introduces what the chatbot **can** and **cannot** help with
-* Clear disclaimer against medical advice
+* Clear explanation of what the chatbot **can** and **cannot** do
+* Medical disclaimer
 * Primary CTA: **“Start Chat”**
 
 ---
 
-### 4.2 Chat Screen
+### 2️⃣ Chat Screen
 
-* Chat-style UI:
+* Input bar for fitness-related queries
+* Chat UI:
 
   * User messages → right aligned
-  * AI messages → left aligned
-* Input bar with send button
-* Loading indicators & error handling
-* Structured AI responses using:
+  * AI responses → left aligned
+* Loading states and graceful error handling
 
-  * Bullet points
-  * Sections
-  * Actionable steps
+Example queries:
 
----
-
-### 4.3 Structured AI Responses
-
-AI responses are never returned as a plain text blob.
-They are formatted using:
-
-* Bullet-point guidance
-* Step-wise plans
-* Clear sections (especially for goal-focused users)
+* “Create a beginner workout plan for 3 days a week”
+* “What are good warm-up exercises before running?”
+* “How can I stay consistent with workouts?”
 
 ---
 
-## 5. Adaptive AI Behavior (Core Feature)
+### 3️⃣ Structured AI Responses
+
+AI responses are **structured and readable**, using:
+
+* Bullet points
+* Day-wise workout breakdowns
+* Clear sections instead of plain text blobs
+
+---
+
+## 🧠 Adaptive AI Behavior (CORE FEATURE)
 
 ### 5.1 Personality-Based Behavior
 
 The chatbot supports **three predefined personalities**:
 
-| Personality              | Traits                                         |
-| ------------------------ | ---------------------------------------------- |
-| **Encouragement Seeker** | Needs reassurance, gentle motivation           |
-| **Creative Explorer**    | Prefers creative framing, avoids spoon-feeding |
-| **Goal Finisher**        | Wants structure, checklists, actionable steps  |
+| Personality          | Behavior                                     |
+| -------------------- | -------------------------------------------- |
+| Encouragement Seeker | Empathetic, reassuring, gentle nudges        |
+| Creative Explorer    | Playful, metaphor-driven, non-linear         |
+| Goal Finisher        | Structured, checklist-based, action-oriented |
 
-Personality can be toggled in-app for demo purposes.
+👉 For demo clarity, personality can be switched via UI buttons.
 
 ---
 
-### 5.2 Usage Duration–Based Coaching Style
+### 5.2 Usage Duration–Based Coaching
 
-The AI adjusts tone based on how long the user has been using the app:
+AI behavior adapts based on how long the user has used the app:
 
-| Days Using App | AI Behavior                                           |
-| -------------- | ----------------------------------------------------- |
-| **0–3 days**   | Empathetic, allows venting, avoids unsolicited advice |
-| **4–8 days**   | Friendly listener, short suggestions after context    |
-| **9+ days**    | Coach-like, direct actionable guidance                |
+| Days Using App | AI Behavior                                          |
+| -------------- | ---------------------------------------------------- |
+| 0–3 days       | Empathetic, allows venting, avoids instant solutions |
+| 4–8 days       | Friendly listener, short suggestions after context   |
+| 9+ days        | Coach-like, direct actionable guidance               |
 
-Usage duration is calculated using **AsyncStorage** based on first app launch date.
+Usage duration is calculated using **persistent local storage** (first app launch date).
 
 ---
 
 ### 5.3 Lifestyle Context (Dummy Data)
 
-Each AI response considers mock lifestyle data:
+Each request includes mock lifestyle data:
 
 ```json
 {
@@ -138,97 +129,93 @@ Each AI response considers mock lifestyle data:
 }
 ```
 
-This data is included in prompt composition to influence AI tone and recommendations.
+This context subtly influences AI responses (e.g., recovery emphasis for low sleep).
 
 ---
 
-## 6. Prompt Composition Strategy
+### 5.4 Prompt Composition Strategy
 
-Every AI request combines **five layers of context**:
-
-1. **User Personality**
-2. **Usage Duration Behavior**
-3. **Movement Data (steps, exercise minutes)**
-4. **Sleep Data**
-5. **User’s Question**
-
-### Example (Conceptual)
+Every AI request combines:
 
 ```
-SYSTEM PROMPT:
-- Personality rules
-- Usage duration rules
-- Safety constraints
-- Lifestyle context
-
-USER MESSAGE:
-"How can I stay consistent with workouts?"
+User Personality
++ Usage Duration Rules
++ Lifestyle Context (steps, exercise, sleep)
++ User Question
 ```
 
-This ensures responses are:
+Prompt composition is centralized in a dedicated prompt builder to ensure:
 
-* Context-aware
-* Behaviorally consistent
-* Safe and structured
+* Clean architecture
+* Consistent behavior
+* Easy extensibility
 
 ---
 
-## 7. Safety & Scope Guardrails
+## 🛑 Safety & Scope Guardrails
 
-The chatbot **explicitly refuses** to answer questions involving:
+The chatbot **politely refuses** to answer questions involving:
 
-* Diseases (e.g., diabetes, heart disease)
-* Injuries (e.g., fractures, ligament tears)
+* Injuries
+* Diseases
 * Medication or supplements
 
-### Handling Strategy
+In such cases, it:
 
-* Keyword-based checks on the backend
-* Polite refusal response
-* Suggestion to consult a certified professional
+* Clearly states it is **not a medical professional**
+* Suggests consulting a certified healthcare provider
 
-Example refusal response:
-
-> “I can’t help with medical or injury-related advice. Please consult a certified healthcare professional.”
+This behavior is demonstrated explicitly in the demo video.
 
 ---
 
-## 8. Bonus Enhancements Implemented
+## ⭐ Bonus Features Implemented
 
-### 🪙 Coin-Based Reward System
+✔ **Coin-Based Reward System**
 
-* Users earn **1 coin per message**
-* Coins are stored using AsyncStorage
-* Displayed persistently in the chat header
+* Users earn **1 coin per prompt**
+* Coins persist across sessions using local storage
 
----
+✔ **RAG-lite FAQ Enrichment**
 
-### 📚 RAG-lite (FAQ Prompt Enrichment)
+* Curated fitness FAQs stored locally in JSON
+* Relevant FAQs are injected into prompts when applicable
 
-* Curated local JSON of fitness FAQs
-* Relevant FAQs are injected into the prompt when applicable
-* Helps guide AI responses without external retrieval systems
+✔ **Chat History Screen**
 
----
+* Displays the last **5–10 conversations**
+* Stored in SQLite and fetched via backend API
 
-### 🕘 Chat History Screen
-
-* Displays last **5–10 chat messages**
-* Stored using SQLite on backend
-* Retrieved via `/history` API
-
----
-
-### 🎨 Theming & Branding
+✔ **Theming & Branding**
 
 * Clean typography
-* Soft, fitness-friendly color palette
-* Thoughtful spacing and layout
-* Platform-consistent UI
+* Consistent color palette
+* Mobile-first design with subtle animations
 
 ---
 
-## 9. Running the Project
+## 🎥 Demo Video
+
+[Click here to watch the demo video](https://drive.google.com/file/d/1Z9ZQ5VEah1T_Ryg7HpAYlzJ9LRNIxOe-/view?usp=sharing)
+
+### Demo Highlights:
+
+* Welcome screen & disclaimer
+* Chat interaction
+* Personality-based behavior (same question, different tones)
+* Usage-duration adaptation
+* Structured AI responses
+* Safety refusal example
+* Bonus features (coins & history)
+
+### 🔁 Note on Demo Design
+
+The **same question is intentionally reused** across personalities to clearly demonstrate **tone and guidance adaptation**.
+Personality toggles are used for demo purposes, as waiting multiple days is impractical in a screening assignment.
+
+---
+
+## ▶️ Running the Project
 
 ### Install dependencies
 
@@ -236,64 +223,23 @@ Example refusal response:
 npm install
 ```
 
-### Start backend
-
-```bash
-node backend/index.js
-```
-
-### Start Expo app
+### Start the app
 
 ```bash
 npx expo start
 ```
 
-> For physical devices, ensure backend runs on the same local network and the correct local IP is used.
+---
+
+## 📦 Android App Bundle (AAB)
+
+[Download Android AAB](https://expo.dev/artifacts/eas/eeZ6LvBHJU2DbsqnjTEqTs.aab)
 
 ---
 
-## 10. Folder Structure (High Level)
+## 📌 Final Notes
 
-```
-/app
-  /(tabs)
-    index.tsx        → Home screen
-    chat.tsx         → Chat screen
-    history.tsx      → Chat history
-/backend
-  index.js           → Express server
-  db.js              → SQLite setup
-  utils/promptBuilder.js
-/constants
-  lifestyle.ts
-  personality.ts
-  fitnessFAQ.ts
-```
+* No medical advice is provided
+* All AI behavior shown is real model output, not hardcoded
+* The project strictly follows the provided starter template and tech constraints
 
----
-
-## 11. AI Tools Used
-
-* LLM API (Chat Completion style)
-* Custom system prompts
-* No auto-generated answers without prompt constraints
-
----
-
-## 12. Demo & Evaluation Notes
-
-This project focuses on:
-
-* **AI behavior design**
-* **UX empathy**
-* **Safety-first fitness guidance**
-* **Clean architecture**
-
-It intentionally avoids being a medical or diagnostic tool.
-
----
-
-## 13. Final Note
-
-This submission prioritizes **intelligent experience design**, not just API calls.
-Every feature is built to demonstrate how AI systems should adapt to **real human behavior**, especially in sensitive domains like fitness and wellness.
