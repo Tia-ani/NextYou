@@ -8,10 +8,13 @@ import {
   Text,
   ActivityIndicator,
   Platform,
+  KeyboardAvoidingView,
+  StatusBar,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { lifestyleData } from "@/constants/lifestyle";
+import { fitnessFAQ } from "@/constants/fitnessFAQ";
 
 interface Message {
   id: string;
@@ -24,13 +27,32 @@ const API_URL =
     ? "http://10.0.2.2:3000/chat"
     : "http://localhost:3000/chat";
 
+type Personality =
+  | "encouragement_seeker"
+  | "creative_explorer"
+  | "goal_finisher";
+
+const getRelevantFAQs = (userMessage: string) => {
+  const lower = userMessage.toLowerCase();
+
+  return fitnessFAQ
+    .filter((faq) =>
+      lower.includes(faq.question.split(" ")[0].toLowerCase())
+    )
+    .slice(0, 3);
+};
+
 export default function ChatScreen() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [daysUsingApp, setDaysUsingApp] = useState(0);
 
-  // ---- USAGE DURATION LOGIC ----
+  const [daysUsingApp, setDaysUsingApp] = useState(0);
+  const [personality, setPersonality] =
+    useState<Personality>("encouragement_seeker");
+
+  const [coins, setCoins] = useState(0);
+
   useEffect(() => {
     const initUsage = async () => {
       const firstLaunch = await AsyncStorage.getItem("firstLaunchDate");
@@ -50,7 +72,23 @@ export default function ChatScreen() {
     initUsage();
   }, []);
 
-  // ---- SEND MESSAGE ----
+  useEffect(() => {
+    const loadCoins = async () => {
+      const storedCoins = await AsyncStorage.getItem("coins");
+      if (storedCoins) {
+        setCoins(Number(storedCoins));
+      }
+    };
+
+    loadCoins();
+  }, []);
+
+  const incrementCoins = async () => {
+    const newCoins = coins + 1;
+    setCoins(newCoins);
+    await AsyncStorage.setItem("coins", newCoins.toString());
+  };
+
   const sendMessage = async () => {
     if (!input.trim()) return;
 
@@ -63,13 +101,13 @@ export default function ChatScreen() {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    await incrementCoins();
+
     setInput("");
     setLoading(true);
 
-    // ✅ DEMO CONTEXT (MANDATORY REQUIREMENT)
-    const personality = "encouragement_seeker"; // hardcoded for demo
-
     try {
+      const relevantFAQs = getRelevantFAQs(userText);
       const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -78,6 +116,7 @@ export default function ChatScreen() {
           personality,
           daysUsingApp,
           lifestyle: lifestyleData,
+          faqContext: relevantFAQs,
         }),
       });
 
@@ -104,7 +143,6 @@ export default function ChatScreen() {
     }
   };
 
-  // ---- RENDER MESSAGE (STRUCTURED OUTPUT) ----
   const renderItem = ({ item }: { item: Message }) => {
     const lines = item.content.split("\n").filter(Boolean);
 
@@ -116,7 +154,10 @@ export default function ChatScreen() {
         ]}
       >
         {lines.map((line, index) => (
-          <Text key={index} style={styles.messageText}>
+          <Text key={index} style={[
+            styles.messageText,
+            item.role === "user" ? styles.userText : styles.assistantText
+          ]}>
             {line.startsWith("-") || line.startsWith("•")
               ? "• " + line.replace(/^[-•]\s*/, "")
               : line}
@@ -126,74 +167,317 @@ export default function ChatScreen() {
     );
   };
 
+  const getPersonalityLabel = (type: Personality) => {
+    switch (type) {
+      case "encouragement_seeker":
+        return "Encourager";
+      case "creative_explorer":
+        return "Creative";
+      case "goal_finisher":
+        return "Goal-Focused";
+    }
+  };
+
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView 
+      style={styles.container} 
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+    >
+      <StatusBar barStyle="dark-content" />
+      
+      {/* Header */}
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.headerTitle}>Fitness AI</Text>
+          <Text style={styles.headerSubtitle}>Your personal trainer</Text>
+        </View>
+        <View style={styles.coinBadge}>
+          <Text style={styles.coinText}>🪙 {coins}</Text>
+        </View>
+      </View>
+
+      {/* Personality Toggle */}
+      <View style={styles.personalityContainer}>
+        <Text style={styles.personalityLabel}>Coaching Style</Text>
+        <View style={styles.personalityRow}>
+          {(["encouragement_seeker", "creative_explorer", "goal_finisher"] as Personality[]).map((type) => (
+            <TouchableOpacity
+              key={type}
+              style={[
+                styles.personalityButton,
+                personality === type && styles.activePersonality,
+              ]}
+              onPress={() => setPersonality(type)}
+              activeOpacity={0.7}
+            >
+              <Text style={[
+                styles.personalityText,
+                personality === type && styles.activePersonalityText
+              ]}>
+                {getPersonalityLabel(type)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      {/* Chat Messages */}
       <FlatList
         data={messages}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.chat}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyEmoji}>💬</Text>
+            <Text style={styles.emptyTitle}>Start Your Journey</Text>
+            <Text style={styles.emptyText}>
+              Ask me anything about fitness, workouts, or building healthy habits!
+            </Text>
+          </View>
+        }
       />
 
-      {loading && <ActivityIndicator style={{ marginBottom: 8 }} />}
+      {loading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="small" color="#1D3D47" />
+          <Text style={styles.loadingText}>Thinking...</Text>
+        </View>
+      )}
 
-      <View style={styles.inputRow}>
-        <TextInput
-          style={styles.input}
-          value={input}
-          onChangeText={setInput}
-          placeholder="Ask something about fitness..."
-        />
-        <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
-          <Text style={{ color: "#fff" }}>Send</Text>
-        </TouchableOpacity>
+      {/* Input Area */}
+      <View style={styles.inputContainer}>
+        <View style={styles.inputRow}>
+          <TextInput
+            style={styles.input}
+            value={input}
+            onChangeText={setInput}
+            placeholder="Ask about workouts, nutrition, habits..."
+            placeholderTextColor="#999"
+            multiline
+            maxLength={500}
+          />
+          <TouchableOpacity 
+            onPress={sendMessage} 
+            style={[
+              styles.sendButton,
+              !input.trim() && styles.sendButtonDisabled
+            ]}
+            disabled={!input.trim()}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.sendButtonText}>→</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
-// ---- STYLES ----
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    backgroundColor: "#F8F9FA",
+  },
+  header: {
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === "ios" ? 60 : 40,
+    paddingBottom: 16,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E5EA",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#1D3D47",
+  },
+  headerSubtitle: {
+    fontSize: 13,
+    color: "#8E8E93",
+    marginTop: 2,
+  },
+  coinBadge: {
+    backgroundColor: "#FFF9E6",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#FFD700",
+  },
+  coinText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1D3D47",
+  },
+  personalityContainer: {
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E5EA",
+  },
+  personalityLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#8E8E93",
+    marginBottom: 10,
+    letterSpacing: 0.5,
+  },
+  personalityRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  personalityButton: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: "#E5E5EA",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+  },
+  activePersonality: {
+    backgroundColor: "#1D3D47",
+    borderColor: "#1D3D47",
+  },
+  personalityText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#8E8E93",
+  },
+  activePersonalityText: {
+    color: "#FFFFFF",
   },
   chat: {
-    paddingBottom: 16,
+    padding: 20,
+    paddingBottom: 100,
+    flexGrow: 1,
+  },
+  emptyState: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 60,
+  },
+  emptyEmoji: {
+    fontSize: 64,
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1D3D47",
+    marginBottom: 8,
+  },
+  emptyText: {
+    fontSize: 15,
+    color: "#8E8E93",
+    textAlign: "center",
+    lineHeight: 22,
+    paddingHorizontal: 40,
   },
   message: {
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 8,
-    maxWidth: "80%",
+    padding: 14,
+    borderRadius: 16,
+    marginBottom: 12,
+    maxWidth: "85%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   messageText: {
+    fontSize: 15,
+    lineHeight: 22,
     marginBottom: 4,
-    lineHeight: 20,
   },
   user: {
     alignSelf: "flex-end",
-    backgroundColor: "#DCF8C6",
+    backgroundColor: "#1D3D47",
+    borderBottomRightRadius: 4,
+  },
+  userText: {
+    color: "#FFFFFF",
   },
   assistant: {
     alignSelf: "flex-start",
-    backgroundColor: "#E6E6E6",
+    backgroundColor: "#FFFFFF",
+    borderBottomLeftRadius: 4,
+  },
+  assistantText: {
+    color: "#1D3D47",
+  },
+  loadingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    gap: 8,
+  },
+  loadingText: {
+    fontSize: 14,
+    color: "#8E8E93",
+    fontStyle: "italic",
+  },
+  inputContainer: {
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#E5E5EA",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 4,
   },
   inputRow: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-end",
+    gap: 10,
   },
   input: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 10,
+    backgroundColor: "#F8F9FA",
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    fontSize: 15,
+    maxHeight: 100,
+    color: "#1D3D47",
   },
   sendButton: {
-    marginLeft: 8,
-    padding: 12,
+    width: 44,
+    height: 44,
     backgroundColor: "#1D3D47",
-    borderRadius: 8,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#1D3D47",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  sendButtonDisabled: {
+    backgroundColor: "#E5E5EA",
+    shadowOpacity: 0,
+  },
+  sendButtonText: {
+    fontSize: 24,
+    fontWeight: "600",
+    color: "#FFFFFF",
   },
 });

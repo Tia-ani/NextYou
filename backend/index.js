@@ -72,6 +72,21 @@ app.post("/chat", async (req, res) => {
   }
 });
 
+// ---- CHAT HISTORY ROUTE (BONUS FEATURE) ----
+app.get("/history", async (req, res) => {
+    try {
+      const rows = await db.all(
+        "SELECT role, message, created_at FROM chats ORDER BY created_at DESC LIMIT 10"
+      );
+  
+      // reverse so UI shows oldest → newest
+      res.json(rows.reverse());
+    } catch (err) {
+      console.error("History fetch error:", err);
+      res.status(500).json({ error: "Failed to fetch chat history" });
+    }
+  });  
+
 app.listen(3000, () => {
   console.log("Backend running on http://localhost:3000");
 });

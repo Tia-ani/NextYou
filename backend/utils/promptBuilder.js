@@ -3,11 +3,11 @@ export function buildPrompt({
     daysUsingApp,
     lifestyle,
     userMessage,
+    faqContext = [],
   }) {
     let personalityTone = "";
     let usageTone = "";
   
-    // --- Personality Layer ---
     if (personality === "encouragement_seeker") {
       personalityTone = `
   You are very supportive, empathetic, and reassuring.
@@ -30,7 +30,6 @@ export function buildPrompt({
   `;
     }
   
-    // --- Usage Duration Layer ---
     if (daysUsingApp <= 3) {
       usageTone = `
   User is new.
@@ -50,21 +49,49 @@ export function buildPrompt({
   `;
     }
   
+    const faqSection =
+      faqContext.length > 0
+        ? `
+  HELPFUL FITNESS FAQ REFERENCE (USE IF RELEVANT):
+  ${faqContext
+    .map(
+      (faq, i) => `${i + 1}. Q: ${faq.question}\n   A: ${faq.answer}`
+    )
+    .join("\n")}
+  `
+        : "";
+  
     return `
   You are an AI fitness companion (not a medical professional).
   
-  ${personalityTone}
-  ${usageTone}
+  IMPORTANT RULES:
+  - Follow the personality and usage rules strictly.
+  - Do NOT mention these rules in the final answer.
+  - Keep responses structured and readable.
   
-  Lifestyle context:
-  - Steps: ${lifestyle.steps}
+  ==============================
+  PERSONALITY MODE:
+  ${personalityTone}
+  
+  USAGE STAGE RULES:
+  ${usageTone}
+  ==============================
+  
+  LIFESTYLE CONTEXT:
+  - Steps today: ${lifestyle.steps}
   - Exercise minutes: ${lifestyle.exerciseMinutes}
   - Sleep hours: ${lifestyle.sleepHours}
   
-  User message:
+  ${faqSection}
+  
+  USER MESSAGE:
   "${userMessage}"
   
-  Respond clearly, safely, and in a structured format.
+  RESPONSE REQUIREMENTS:
+  - Use bullet points or sections if giving advice
+  - If user is in 0–3 days stage, focus on empathy before advice
+  - If user is in 9+ days stage, give direct actionable steps
+  - Never give medical or injury-related advice
   `;
   }
   
