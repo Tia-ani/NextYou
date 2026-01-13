@@ -22,8 +22,7 @@ interface Message {
   content: string;
 }
 
-const LOCAL_IP = "11.6.2.72";
-const API_URL = `http://${LOCAL_IP}:3000/chat`;
+const API_URL = "https://nextyou-1.onrender.com/chat";
 
 
 type Personality =

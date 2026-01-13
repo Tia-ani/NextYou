@@ -1,13 +1,13 @@
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    Platform,
-    StatusBar,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 interface HistoryItem {
@@ -16,12 +16,7 @@ interface HistoryItem {
   created_at: string;
 }
 
-const LOCAL_IP = "11.6.2.72";
-
-const API_URL =
-  Platform.OS === "android"
-    ? `http://${LOCAL_IP}:3000/history`
-    : `http://${LOCAL_IP}:3000/history`;
+const API_URL = "https://nextyou-1.onrender.com/history";
 
 export default function HistoryScreen() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
